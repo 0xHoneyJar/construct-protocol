@@ -88,46 +88,78 @@ Output as a structured landscape with maturity ratings (experimental / growing /
 
 ---
 
-## Prompt 3: Game Design Principles Applied to Transaction UX
+## Prompt 3: Material Feel Applied to Transaction UX — Context-Dependent Interaction Design
 
 ```
-Research the intersection of game design principles and Web3 transaction UX.
-The thesis: the best dApp experiences feel like games — snappy, responsive, zero-friction, and deeply satisfying when an action completes.
+Research how the "feel" of Web3 transaction experiences should vary based on the material personality of the application. The thesis: there is no single correct transaction UX — a cozy social app (soft, fluid, relaxed) and a DeFi trading terminal (sharp, immediate, dense) should feel fundamentally different, even when executing the same on-chain action.
+
+**Core framework — Material as Feel:**
+
+UI feel can be decomposed along these axes (from the Artisan construct's design system):
+- **Warmth** — cold/clinical vs. warm/inviting
+- **Weight** — lightweight/instant vs. heavy/consequential
+- **Rhythm** — staccato/rapid vs. flowing/measured
+
+These map to seven material dimensions:
+- Spacing (tight/dense vs. generous/spacious)
+- Color (muted/subtle vs. vibrant/bold)
+- Typography (sharp/technical vs. soft/editorial)
+- Motion (immediate/100ms vs. eased/300ms+)
+- Density (packed information vs. breathing room)
+- Corners (sharp/modern vs. rounded/friendly)
+- Elevation (flat/minimal vs. layered/shadowed)
 
 **Core references:**
 - Raph Koster's "A Theory of Fun for Game Design" — fun as learning
 - Emil Kowalski's interaction design principles — animation, motion, feedback
-- Juice It or Lose It (GDC talk) — game feel through visual/audio/haptic feedback
 - "Game Feel" by Steve Swink — the experience of interacting with virtual objects
+- Juice It or Lose It (GDC talk) — game feel through visual/audio/haptic feedback
+- The concept of "physics of consequence" — heavier actions (financial, irreversible) should feel heavier in the UI
 
 **Research questions:**
 
-1. **Transaction as game action:**
-   - How should a transaction feel? Compare: submitting a bid, executing a swap, minting an NFT
-   - What's the equivalent of "game juice" for a blockchain transaction? (visual feedback, animation, sound, haptics)
-   - How do the best apps (Family, Rainbow, Uniswap) make waiting for confirmations feel satisfying instead of anxious?
+1. **Transaction feel varies by material:**
+   - How should a swap feel in a cozy social wallet (San Frigeti — soft, fluid, relaxing music, ease curves) vs. a pro trading terminal (Drift — sharp, immediate, dense, zero wasted space)?
+   - What are the concrete CSS/motion differences? Compare: easing curves, duration, spacing around pending states, confirmation feedback
+   - How do apps like Family (warm, rounded, generous spacing) vs. Blur (dense, sharp, dark, immediate) achieve their distinct material feels for the same fundamental action (sending a transaction)?
+   - Can you find examples of apps that intentionally slow down interactions to create a feeling of weight or importance?
 
-2. **Error states as game design:**
-   - In games, failure is a learning opportunity. How should a reverted transaction feel?
-   - What's the equivalent of "try again" vs "game over" for different transaction failure types?
-   - How do you turn "insufficient gas" or "slippage too high" into actionable, non-scary guidance?
+2. **Weight of consequence as physics:**
+   - Irreversible actions (token approvals, large swaps, bridge transfers) should feel heavier than reversible ones (toggling settings, filtering)
+   - Research: how do the best apps signal consequence through timing? (800ms pessimistic confirmation for deletes vs. 100ms optimistic for local state)
+   - How does Stripe's payment confirmation UX create a sense of "this mattered" through motion and timing?
+   - Compare the "weight" vocabulary: delete/destroy/revoke (heavy) vs. archive/dismiss/snooze (soft) vs. toggle/expand/collapse (light)
 
-3. **Progressive disclosure in Web3:**
-   - How do games introduce complex systems gradually? Apply to: gas settings, slippage, MEV protection, advanced order types
-   - What should a first-time user see vs an expert user for the same swap interface?
-   - How do you reveal chain complexity without overwhelming — similar to how games reveal crafting systems, skill trees
+3. **Error states match the material:**
+   - A reverted transaction in a cozy app should feel different from one in a trading terminal
+   - Cozy: gentle explanation, warm colors, "let's try again together" energy
+   - Terminal: immediate, precise error code, quick retry action, no hand-holding
+   - How do you turn "insufficient gas" or "slippage too high" into guidance that matches the app's personality?
 
-4. **Flow state and dApps:**
+4. **Progressive disclosure tuned to density:**
+   - Dense apps (Aave, Drift) can show gas settings inline — users expect information density
+   - Spacious apps (Family, Rainbow) should hide complexity behind progressive reveal — the surface should feel calm
+   - How do games introduce complex systems gradually? Apply to: gas settings, slippage, MEV protection
+   - What should first-time vs. expert users see — and how does the app's material personality affect this threshold?
+
+5. **Flow state and rhythm:**
    - Gloria Mark's research (UC Irvine): 23 minutes to refocus after interruption
-   - How do wallet popups, gas approval steps, chain-switching break flow?
+   - Wallet popups, gas approvals, chain-switching all break flow — but the *cost* of breaking flow depends on the material. A meditative app suffers more from interruption than a rapid-fire terminal where users expect context switches.
    - What patterns minimize interruptions while maintaining security? (session keys, gas abstraction, batch transactions)
+   - How do different material personalities handle the "waiting for confirmation" state? (Soft: gentle pulse, reassuring copy. Sharp: progress bar, ETA, block number.)
 
-5. **Snappiness and perceived performance:**
-   - Optimistic updates for pending transactions — what's the standard pattern?
-   - How do apps like Family achieve "feels instant" UX on a 12-second block time chain?
-   - Skeleton states, progressive loading, and transaction streaming
+6. **Perceived performance is material-dependent:**
+   - "Snappy" is not universally correct. A 200ms ease-out feels right for a trading app but rushed for a meditation app.
+   - Optimistic updates: when are they appropriate (lightweight actions) vs. inappropriate (consequential transactions where false confidence is dangerous)?
+   - How do apps like Family achieve "feels right" (not "feels fast") UX on a 12-second block time chain?
 
-Output as a design principles document with concrete before/after examples suitable for encoding into an AI construct that assists with dApp development.
+**Output format:**
+For each research question, provide findings organized by material personality:
+- **Soft/Cozy** (e.g., San Frigeti, Family, Rainbow) — generous, warm, fluid
+- **Sharp/Dense** (e.g., Drift, Blur, Aave) — tight, immediate, information-rich
+- **Premium/Minimal** (e.g., Uniswap, Stripe) — spacious, confident, restrained
+
+Include concrete CSS/motion values, easing curves, and timing where possible. The goal is to produce a material-indexed reference that an AI construct can use to adapt its dApp development guidance based on the target application's personality.
 ```
 
 ---

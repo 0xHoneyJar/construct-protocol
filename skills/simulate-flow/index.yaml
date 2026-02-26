@@ -1,0 +1,56 @@
+name: simulate-flow
+slug: simulate-flow
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to simulate a transaction or user flow
+  before executing it on-chain, dry-run a contract interaction, estimate gas,
+  or catch potential reverts before users encounter them. Simulates with
+  realistic parameters derived from frontend code and compares expected
+  outcomes against what the UI would display.
+
+triggers:
+  - "/simulate"
+  - "simulate transaction"
+  - "test transaction"
+  - "dry run"
+  - "will this tx work"
+  - "estimate gas"
+  - "what would happen if"
+
+examples:
+  - context: "User wants to test a bid flow before going live"
+    user_says: "simulate a bid of 1 ETH on auction 42"
+    agent_action: "Reads auction contract parameters, constructs bid calldata, simulates via cast call, reports success/failure with gas estimate and decoded return values"
+  - context: "Testing swap with specific parameters"
+    user_says: "dry run a swap of 100 USDC for ETH on our router"
+    agent_action: "Finds router address, constructs swap calldata with deadline and slippage, simulates, compares expected output against frontend quote"
+  - context: "Pre-launch flow validation"
+    user_says: "simulate the full deposit flow to make sure it won't revert"
+    agent_action: "Identifies deposit function, checks allowance requirements, simulates approve+deposit sequence, reports expected gas and state changes"
+
+domain_hints: [web3, simulation, transactions, gas, testing, foundry, cast, dapp-qa]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: safe
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

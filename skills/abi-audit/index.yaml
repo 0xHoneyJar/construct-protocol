@@ -1,0 +1,56 @@
+name: abi-audit
+slug: abi-audit
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to check whether frontend ABI definitions
+  match the deployed contract, find stale ABIs, detect function signature
+  mismatches, or audit wagmi/viem contract hook usage against on-chain reality.
+  Catches the second most common dApp bug class: stale or incorrect ABIs
+  causing silent failures or wrong data decoding.
+
+triggers:
+  - "/audit-abi"
+  - "check ABI"
+  - "frontend-contract mismatch"
+  - "stale ABI"
+  - "ABI out of date"
+  - "wrong function signature"
+  - "contract interface mismatch"
+
+examples:
+  - context: "After contract upgrade, frontend may have stale ABI"
+    user_says: "check if our ABIs match what's deployed"
+    agent_action: "Finds all ABI files and wagmi hooks in project, reads deployed ABI via cast, diffs function signatures, reports mismatches with severity"
+  - context: "Frontend call reverts unexpectedly"
+    user_says: "audit-abi for the marketplace contract"
+    agent_action: "Compares frontend ABI against deployed contract, finds function signature mismatch causing the revert, provides corrected ABI"
+  - context: "Proactive QA before launch"
+    user_says: "check all our contract ABIs are current"
+    agent_action: "Scans all ABI files and contract definitions, verifies each against deployed contracts, produces comprehensive audit report"
+
+domain_hints: [web3, abi, smart-contracts, wagmi, viem, verification, frontend]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: safe
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

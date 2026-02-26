@@ -1,0 +1,53 @@
+name: dapp-lint
+slug: dapp-lint
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to lint a Web3 dApp frontend for common anti-patterns,
+  asks to "check code quality" for blockchain code, or wants to find BigInt safety issues,
+  wei handling bugs, address checksum problems, or timestamp confusion in their codebase.
+
+triggers:
+  - "/lint-dapp"
+  - "lint dapp"
+  - "check code quality"
+  - "web3 lint"
+  - "check for web3 bugs"
+  - "find bigint issues"
+
+examples:
+  - context: "Developer working on a wagmi-based frontend"
+    user_says: "lint my dapp for common web3 issues"
+    agent_action: "Runs oxlint if available, then scans for Web3-specific anti-patterns using grep, generates structured lint report"
+  - context: "Developer reviewing code before deployment"
+    user_says: "/lint-dapp"
+    agent_action: "Checks for BigInt safety, address checksums, timestamp confusion, hardcoded values, and unsafe coercions"
+  - context: "Developer fixing a bug where token amounts display incorrectly"
+    user_says: "check code quality on my contract interaction code"
+    agent_action: "Scans for Number() coercions on BigInt values, .toString() without radix, and wei/ether unit confusion"
+
+domain_hints: [web3, linting, dapp, bigint, wagmi, viem, solidity, code-quality]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: safe
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

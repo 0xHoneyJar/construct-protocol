@@ -1,0 +1,55 @@
+name: tx-forensics
+slug: tx-forensics
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to debug a failed or unexpected transaction,
+  decode revert reasons, trace internal calls, or understand what a transaction
+  actually did on-chain. Handles custom errors, panic codes, Safe multicall
+  decoding, and complex nested calldata.
+
+triggers:
+  - "/debug-tx"
+  - "debug transaction"
+  - "why did tx revert"
+  - "trace transaction"
+  - "transaction failed"
+  - "decode revert"
+  - "what happened in this tx"
+
+examples:
+  - context: "User has a reverted transaction hash"
+    user_says: "why did 0xabc...def revert?"
+    agent_action: "Fetches receipt, decodes custom error or require message, explains the revert in plain language with fix suggestion"
+  - context: "Complex Safe multisig transaction"
+    user_says: "debug this Safe tx: 0x123...456"
+    agent_action: "Traces internal calls, decodes execTransaction payload, identifies which inner call failed, explains the full execution path"
+  - context: "User sees unexpected behavior"
+    user_says: "trace what this transaction actually did on mainnet"
+    agent_action: "Runs cast trace, decodes all internal calls, identifies state changes, presents human-readable execution summary"
+
+domain_hints: [web3, transactions, debugging, revert, trace, foundry, cast, safe]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: safe
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

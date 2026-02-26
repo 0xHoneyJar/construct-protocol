@@ -1,0 +1,54 @@
+name: dapp-test
+slug: dapp-test
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to run the dApp test suite, check test coverage for
+  contract interaction code, debug failing Web3 tests, or generate starter test files
+  for untested contract interactions.
+
+triggers:
+  - "/test-dapp"
+  - "run tests"
+  - "test suite"
+  - "vitest"
+  - "run web3 tests"
+  - "test contract interactions"
+  - "check test coverage"
+
+examples:
+  - context: "Developer wants to run their dApp test suite"
+    user_says: "/test-dapp"
+    agent_action: "Detects test runner, checks for Web3 test setup, runs suite, analyzes failures with Web3 context, reports coverage of contract-touching code"
+  - context: "Tests are failing with RPC errors"
+    user_says: "run tests, they keep failing with connection errors"
+    agent_action: "Identifies missing anvil fork, suggests setup, fixes test configuration, re-runs tests"
+  - context: "New project with no tests"
+    user_says: "test my dapp"
+    agent_action: "Detects no tests exist, generates starter test files with wagmi mock patterns and anvil fork setup"
+
+domain_hints: [web3, testing, vitest, jest, wagmi, viem, anvil, hardhat, mocking, coverage]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: moderate
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

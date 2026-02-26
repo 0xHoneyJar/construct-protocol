@@ -1,0 +1,56 @@
+name: proxy-inspect
+slug: proxy-inspect
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to inspect a proxy contract's architecture,
+  find the implementation address, identify the proxy pattern (Transparent,
+  UUPS, Beacon, Diamond), check the admin/owner, or understand the upgrade
+  mechanism. Essential for understanding what code is actually executing
+  behind a proxy address.
+
+triggers:
+  - "/inspect-proxy"
+  - "check proxy"
+  - "what's deployed"
+  - "implementation address"
+  - "proxy pattern"
+  - "is this upgradeable"
+  - "who can upgrade"
+
+examples:
+  - context: "User has a contract address and wants to know if it's a proxy"
+    user_says: "inspect proxy at 0xABC...123 on mainnet"
+    agent_action: "Reads EIP-1967 slots, identifies proxy type, finds implementation address, checks admin, reports architecture with security notes"
+  - context: "User wants to verify upgrade safety"
+    user_says: "check if this proxy is UUPS or transparent"
+    agent_action: "Reads implementation and admin slots, checks for upgradeToAndCall in implementation, determines proxy pattern, reports findings"
+  - context: "Security review of deployed contract"
+    user_says: "who controls upgrades for this contract?"
+    agent_action: "Reads admin slot, resolves admin address (EOA vs multisig), checks for timelock, reports upgrade authority chain"
+
+domain_hints: [web3, proxy, eip-1967, upgradeable, smart-contracts, security, foundry]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: safe
+  effort_hint: small
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

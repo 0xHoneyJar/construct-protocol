@@ -1,0 +1,55 @@
+name: gpt-contract-review
+slug: gpt-contract-review
+version: 1.0.0
+description: |
+  Use this skill IF the user wants an adversarial cross-model review of frontend↔contract
+  interaction code, asks for a "second opinion" on Web3 code, wants GPT to review Claude's
+  work (or vice versa), or needs deep analysis of parameter consistency, error handling,
+  and BigInt safety across the contract interaction chain.
+
+triggers:
+  - "/review-contract"
+  - "review contract interaction"
+  - "cross-model review"
+  - "gpt review web3"
+  - "adversarial review"
+  - "second opinion on contracts"
+  - "review my web3 code"
+
+examples:
+  - context: "Developer wants thorough review before deploying contract interactions"
+    user_says: "/review-contract"
+    agent_action: "Collects all contract interaction code, prepares structured review prompt, sends to GPT for cross-model review, generates Bridgebuilder-format findings"
+  - context: "Developer concerned about parameter safety in their swap implementation"
+    user_says: "cross-model review my swap code"
+    agent_action: "Identifies all swap-related contract calls, checks parameter consistency, error handling, gas estimation, and BigInt safety, then sends to GPT for adversarial review"
+  - context: "Code review before mainnet deployment"
+    user_says: "get a second opinion on my contract integration"
+    agent_action: "Comprehensive audit of all ABI references, address constants, transaction building, and error paths with cross-model validation"
+
+domain_hints: [web3, review, security, contracts, abi, adversarial, cross-model, audit]
+entry: SKILL.md
+
+capabilities:
+  model_tier: opus
+  danger_level: moderate
+  effort_hint: large
+  downgrade_allowed: false
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: true
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

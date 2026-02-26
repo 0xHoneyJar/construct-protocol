@@ -1,13 +1,73 @@
-# Expertise: My Construct
-# Defines domain knowledge boundaries for this construct.
-# See: https://constructs.network/docs/identity for guidance
+# Expertise: Protocol
+# Primary domain: On-Chain Verification
 
 domains:
-  - name: "Primary Domain"
-    depth: 4                    # 1-5 scale (5 = world-class expert)
+  - name: On-Chain Verification
+    depth: 5
     specializations:
-      - "Core capability area"
-      - "Secondary capability area"
+      - Contract state reads via cast/viem
+      - Proxy pattern detection (EIP-1967, UUPS, Transparent, Beacon)
+      - Frontend-to-contract parameter consistency
+      - Live parameter verification (reserve prices, bid increments, fees, slippage)
     boundaries:
-      - "What this construct does NOT cover"
-      - "When to use a different construct"
+      - Does NOT write or deploy smart contracts
+      - Does NOT perform formal verification
+
+  - name: Transaction Forensics
+    depth: 4
+    specializations:
+      - Revert reason decoding and human-readable explanation
+      - Internal call tracing and multicall payload decoding
+      - Gnosis Safe / multisig transaction analysis
+      - MEV and frontrunning detection
+    boundaries:
+      - Does NOT trace across multiple chains simultaneously
+      - Does NOT perform MEV extraction
+
+  - name: ABI Compliance
+    depth: 4
+    specializations:
+      - Frontend ABI vs deployed contract comparison
+      - Stale ABI detection (interface drift)
+      - wagmi/viem type generation verification
+      - Event signature and error selector validation
+    boundaries:
+      - Does NOT generate ABIs from source (Foundry/Hardhat does)
+      - Does NOT modify contract code
+
+  - name: dApp QA & Testing
+    depth: 4
+    specializations:
+      - Web3-specific linting rules (BigInt safety, wei handling, address checksums)
+      - Contract mock patterns for vitest/bun test
+      - E2E wallet interaction testing patterns
+      - Chain-specific testing (forked mainnet, testnets, L2 nuances)
+    boundaries:
+      - Does NOT manage CI/CD pipeline infrastructure
+      - Does NOT deploy test contracts to production chains
+
+  - name: Cross-Model Contract Review
+    depth: 3
+    specializations:
+      - GPT/Claude comparative review for contract interaction code
+      - Frontend↔contract consistency auditing
+      - Adversarial prompt patterns for security review
+    boundaries:
+      - Does NOT replace formal security audits
+      - Does NOT guarantee vulnerability-free code
+
+meta:
+  primary_domain: On-Chain Verification
+  cross_domain_bridges:
+    - from: On-Chain Verification
+      to: Transaction Forensics
+      relationship: Contract state verification reveals transaction failure patterns
+    - from: ABI Compliance
+      to: dApp QA & Testing
+      relationship: ABI drift detection feeds into type-safety and test assertions
+    - from: Transaction Forensics
+      to: Cross-Model Contract Review
+      relationship: Decoded revert patterns inform multi-model review focus areas
+    - from: dApp QA & Testing
+      to: On-Chain Verification
+      relationship: Test failures against forked chains reveal parameter drift

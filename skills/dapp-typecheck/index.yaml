@@ -1,0 +1,54 @@
+name: dapp-typecheck
+slug: dapp-typecheck
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to verify wagmi/viem type generation matches deployed ABIs,
+  check for type drift between contract deploys and frontend codegen, or run TypeScript checks
+  on contract interaction code.
+
+triggers:
+  - "/typecheck-dapp"
+  - "typecheck contracts"
+  - "verify types"
+  - "wagmi types"
+  - "check abi types"
+  - "type drift"
+  - "regenerate contract types"
+
+examples:
+  - context: "Developer updated a smart contract and redeployed"
+    user_says: "typecheck my dapp after the contract update"
+    agent_action: "Checks wagmi codegen config, regenerates types from ABIs, runs tsc --noEmit, reports mismatches between generated types and usage"
+  - context: "Developer seeing TypeScript errors in contract calls"
+    user_says: "/typecheck-dapp"
+    agent_action: "Finds wagmi.config.ts, verifies ABI freshness, runs type generation, identifies type mismatches with file:line references"
+  - context: "New team member onboarding"
+    user_says: "verify types are in sync with contracts"
+    agent_action: "Cross-references deployed ABIs with TypeScript types, checks for missing function signatures, reports drift"
+
+domain_hints: [web3, typescript, wagmi, viem, abi, codegen, typecheck, contracts]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: moderate
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

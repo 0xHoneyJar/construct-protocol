@@ -1,0 +1,58 @@
+name: contract-verify
+slug: contract-verify
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to verify on-chain contract state against
+  frontend hardcoded values, check deployed parameters, or ground dApp
+  assumptions in chain reality. This is the core Web3 verification skill —
+  it catches the #1 class of dApp bugs: frontend showing one thing while
+  the chain enforces another.
+
+triggers:
+  - "/verify-contract"
+  - "verify contract"
+  - "check on-chain"
+  - "ground in chain"
+  - "contract state mismatch"
+  - "frontend doesn't match contract"
+  - "check deployed parameters"
+
+examples:
+  - context: "User suspects auction frontend shows wrong minimum bid"
+    user_says: "verify the auction contract parameters match what the frontend shows"
+    agent_action: "Reads contract address from config, detects proxy pattern, reads on-chain state via cast, scans frontend for hardcoded values, reports discrepancies"
+  - context: "New deployment, need sanity check"
+    user_says: "check on-chain state for 0xABC...123 on mainnet"
+    agent_action: "Reads all public view functions via cast, identifies key parameters, scans codebase for matching constants, produces verification report"
+  - context: "User reports a fee discrepancy"
+    user_says: "the frontend says 2.5% fee but users are getting charged 5%"
+    agent_action: "Reads fee parameter from contract, finds hardcoded fee in frontend, identifies the mismatch with file:line references and fix"
+
+domain_hints: [web3, smart-contracts, verification, dapp-qa, on-chain, foundry, cast]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: safe
+  effort_hint: medium
+  downgrade_allowed: true
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+  - Edit
+  - Task
+
+zones:
+  system: read
+  state: write
+  app: read

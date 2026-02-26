@@ -1,0 +1,54 @@
+name: dapp-e2e
+slug: dapp-e2e
+version: 1.0.0
+description: |
+  Use this skill IF the user wants to run end-to-end browser tests for a Web3 dApp,
+  test wallet connection flows, verify transaction submission UX, or generate
+  Playwright scripts for dApp user journeys.
+
+triggers:
+  - "/e2e-dapp"
+  - "e2e test"
+  - "browser test"
+  - "wallet test"
+  - "test wallet connection"
+  - "playwright web3"
+  - "test the dapp in browser"
+
+examples:
+  - context: "Developer wants to verify wallet connection flow"
+    user_says: "/e2e-dapp"
+    agent_action: "Checks for Playwright or agent-browser, identifies key user flows, generates and/or executes E2E tests covering wallet connect, transaction submit, and state verification"
+  - context: "Developer deploying a new feature"
+    user_says: "run browser tests on the dapp"
+    agent_action: "Scans frontend routes for transaction flows, creates Playwright tests with mock wallet, runs them against local dev server"
+  - context: "Developer without Playwright setup"
+    user_says: "e2e test my wallet connection"
+    agent_action: "Generates Playwright test scripts with Web3 mock patterns, provides setup instructions, optionally runs via agent-browser if available"
+
+domain_hints: [web3, e2e, playwright, browser, wallet, testing, dapp, transactions, wagmi]
+entry: SKILL.md
+
+capabilities:
+  model_tier: sonnet
+  danger_level: high
+  effort_hint: large
+  downgrade_allowed: false
+  execution_hint: sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: true
+
+allowed-tools:
+  - Read
+  - Write
+  - Bash
+  - Glob
+  - Grep
+
+zones:
+  system: read
+  state: write
+  app: read

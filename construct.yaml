@@ -1,0 +1,69 @@
+# construct.yaml — Construct pack manifest
+# See: https://constructs.network/docs/schema for full reference
+# Validate: yq eval '.' construct.yaml && ajv validate -s schemas/construct.schema.json
+
+schema_version: 3
+
+# Display name for registry and UI
+name: "My Construct"
+
+# URL-safe identifier (kebab-case, 2+ chars)
+slug: my-construct
+
+# Semantic version — bump on each release
+version: 1.0.0
+
+# One-line description shown in registry search results
+description: "A brief description of what this construct does"
+
+# Your name or organization
+author: your-name
+
+# SPDX license identifier
+license: MIT
+
+# Skills provided by this construct
+# Each skill maps to a directory under skills/
+skills:
+  - slug: example-skill
+    path: skills/example-skill
+
+# Slash commands registered in the runtime
+# Each command maps to a markdown file under commands/
+commands:
+  - name: example-command
+    path: commands/example-command.md
+
+# Repository metadata (auto-populated by extraction script)
+repository:
+  url: https://github.com/your-org/construct-my-construct.git
+  homepage: https://constructs.network/constructs/my-construct
+
+# Event bus integration (optional)
+# events:
+#   emits:
+#     - type: forge.my-construct.something_happened
+#       description: Emitted when something happens
+#       data_schema:
+#         entity_id: string
+#   consumes:
+#     - event: forge.other-construct.event_name
+
+# Dependencies on other construct packs (optional)
+# pack_dependencies:
+#   - slug: other-construct
+#     version: ">=1.0.0"
+
+# Identity files for persona and expertise
+identity:
+  persona: identity/persona.yaml
+  expertise: identity/expertise.yaml
+
+# Post-install hook (optional)
+# hooks:
+#   post_install: scripts/install.sh
+
+# Quick start command shown after installation
+quick_start:
+  command: /example-command
+  description: get started with this construct

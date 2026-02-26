@@ -1,0 +1,20 @@
+# Skill: example-skill
+# Each skill needs an index.yaml and a SKILL.md
+
+slug: example-skill
+name: "Example Skill"
+description: "A template skill — replace with your implementation"
+version: 1.0.0
+
+# Capability metadata for intelligent routing
+capabilities:
+  model_tier: sonnet          # sonnet | opus | haiku
+  danger_level: safe          # safe | moderate | high | critical
+  effort_hint: small          # small | medium | large
+  downgrade_allowed: true     # Can fall back to cheaper model?
+  execution_hint: sequential  # parallel | sequential
+  requires:
+    native_runtime: false
+    tool_calling: true
+    thinking_traces: false
+    vision: false

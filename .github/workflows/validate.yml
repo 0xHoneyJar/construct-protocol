@@ -1,0 +1,107 @@
+name: Validate Construct
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Validate construct.yaml syntax
+        run: yq eval '.' construct.yaml > /dev/null
+
+      - name: Check required fields
+        run: |
+          for field in schema_version name slug version; do
+            val=$(yq ".$field" construct.yaml)
+            if [[ "$val" == "null" || -z "$val" ]]; then
+              echo "ERROR: Missing required field: $field"
+              exit 1
+            fi
+          done
+          echo "All required fields present"
+
+      - name: Validate identity files
+        run: |
+          if [[ ! -f identity/persona.yaml ]]; then
+            echo "ERROR: identity/persona.yaml not found"
+            exit 1
+          fi
+          if [[ ! -f identity/expertise.yaml ]]; then
+            echo "ERROR: identity/expertise.yaml not found"
+            exit 1
+          fi
+
+          for field in cognitiveFrame.archetype cognitiveFrame.disposition cognitiveFrame.thinking_style cognitiveFrame.decision_making; do
+            val=$(yq ".$field" identity/persona.yaml)
+            if [[ "$val" == "null" || -z "$val" ]]; then
+              echo "ERROR: Missing required persona field: $field"
+              exit 1
+            fi
+          done
+
+          voice=$(yq ".voice" identity/persona.yaml)
+          if [[ "$voice" == "null" ]]; then
+            echo "ERROR: Missing voice block in persona.yaml"
+            exit 1
+          fi
+
+          # Validate expertise domains
+          domains=$(yq ".domains" identity/expertise.yaml)
+          if [[ "$domains" == "null" ]]; then
+            echo "ERROR: Missing domains array in expertise.yaml"
+            exit 1
+          fi
+
+          domain_count=$(yq '.domains | length' identity/expertise.yaml)
+          if [[ "$domain_count" -lt 1 ]]; then
+            echo "ERROR: At least one domain required in expertise.yaml"
+            exit 1
+          fi
+
+          for i in $(seq 0 $((domain_count - 1))); do
+            name=$(yq ".domains[$i].name" identity/expertise.yaml)
+            depth=$(yq ".domains[$i].depth" identity/expertise.yaml)
+            if [[ "$name" == "null" || -z "$name" ]]; then
+              echo "ERROR: Missing name in domain $i"
+              exit 1
+            fi
+            if [[ "$depth" == "null" || -z "$depth" ]]; then
+              echo "ERROR: Missing depth in domain $i"
+              exit 1
+            fi
+            if [[ "$depth" -lt 1 || "$depth" -gt 5 ]]; then
+              echo "ERROR: depth must be 1-5 in domain $i (got: $depth)"
+              exit 1
+            fi
+          done
+
+          echo "Identity validation passed"
+
+      - name: Check skill structure
+        run: |
+          skill_count=$(yq '.skills | length' construct.yaml)
+          echo "Found $skill_count skills"
+          for i in $(seq 0 $((skill_count - 1))); do
+            slug=$(yq ".skills[$i].slug" construct.yaml)
+            path=$(yq ".skills[$i].path" construct.yaml)
+            if [[ ! -d "$path" ]]; then
+              echo "WARNING: Skill directory not found: $path (slug: $slug)"
+            fi
+            if [[ ! -f "$path/index.yaml" ]]; then
+              echo "WARNING: Missing index.yaml for skill: $slug"
+            fi
+            if [[ ! -f "$path/SKILL.md" ]]; then
+              echo "WARNING: Missing SKILL.md for skill: $slug"
+            fi
+          done
+          echo "Skill structure check complete"

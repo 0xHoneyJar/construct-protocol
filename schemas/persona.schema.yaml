@@ -1,0 +1,67 @@
+# persona.schema.yaml — JSON Schema for identity/persona.yaml
+# Validates cognitive frame and voice configuration.
+# Field paths match parseIdentity() in git-sync.ts (L741-756)
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: Construct Persona
+type: object
+required:
+  - cognitiveFrame
+  - voice
+properties:
+  name:
+    type: string
+    description: Display name for this construct persona
+  status:
+    type: string
+    enum: [draft, stable, deprecated]
+    description: Maturity status of the persona definition
+
+  cognitiveFrame:
+    type: object
+    description: How this construct thinks and makes decisions
+    required:
+      - archetype
+      - disposition
+      - thinking_style
+      - decision_making
+    properties:
+      archetype:
+        type: string
+        description: "Primary cognitive archetype (e.g., Specialist, Generalist, Strategist)"
+      disposition:
+        type: string
+        description: "General behavioral disposition"
+      thinking_style:
+        type: string
+        description: "Approach to problem-solving (e.g., Analytical, Creative, Systematic)"
+      decision_making:
+        type: string
+        description: "Decision-making methodology (e.g., Evidence-based, Intuitive, Consensus)"
+    additionalProperties: true
+
+  voice:
+    type: object
+    description: How this construct communicates
+    required:
+      - tone
+      - register
+    properties:
+      tone:
+        type: string
+        description: "Communication tone (e.g., Professional, Casual, Authoritative)"
+      register:
+        type: string
+        description: "Language register (e.g., Technical, Conversational, Academic)"
+      personality_markers:
+        type: array
+        items:
+          type: string
+        description: "Distinctive personality traits reflected in communication"
+    additionalProperties: true
+
+  model_preferences:
+    type: object
+    description: Optional model routing preferences
+    additionalProperties: true
+
+additionalProperties: true

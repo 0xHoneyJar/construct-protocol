@@ -195,6 +195,68 @@ Then try calling each discovered function name.
 
 **Record every value you read.** You'll need them all for the comparison phase.
 
+## Phase 3.5: Semantic Activation Analysis
+
+After reading on-chain state in Phase 3, apply semantic interpretation to detect features that are disabled, paused, or expired — then cross-reference against the frontend to find UI elements that would trigger guaranteed-revert transactions.
+
+### Semantic Rules
+
+Apply these rules to every value read in Phase 3:
+
+| Return Value | Semantic Meaning | Action |
+|---|---|---|
+| `address(0)` from token/reward/fee getter | **Feature disabled** — not initialized | Grep frontend for related UI (buttons, forms, claim handlers). Flag if interactive. |
+| `paused() == true` | **Contract paused** | All write buttons should be disabled. Flag any active write UI. |
+| `totalSupply == maxSupply` or `totalSupply == cap` | **Sold out** | Mint/deposit UI should show "sold out". Flag active mint/deposit buttons. |
+| `owner() == address(0)` | **Ownership renounced** | Admin features should be hidden. Flag any admin UI. |
+| Timestamp getter < current `block.timestamp` | **Expired** deadline/auction/epoch | UI should show "ended". Flag active bid/claim/deposit buttons. |
+
+### Execution Steps
+
+1. **Review Phase 3 results** for values matching any semantic rule above.
+
+2. **For each semantic match**, search the frontend:
+   ```
+   # For address(0) on rewardToken:
+   Grep for "reward" or "claim" in components/, hooks/
+   Look for buttons, forms, or submit handlers related to the disabled feature
+   ```
+
+3. **Classify the finding**:
+   - **CRITICAL**: User can click a button that triggers a write to a disabled/paused feature → guaranteed revert
+   - **HIGH**: UI displays information about a disabled feature without indicating it's inactive → misleading
+   - **INFO**: Feature is disabled but no related UI exists → clean (no action needed)
+
+4. **Report format**:
+   ```
+   PHASE 3.5: Semantic Activation Analysis
+
+   rewardToken() = 0x0000000000000000000000000000000000000000
+     Semantic: FEATURE_DISABLED (rewards not initialized)
+     Frontend: components/rewards-panel.tsx has "Claim Rewards" button (line 45)
+     Hook: hooks/use-moneycomb-rewards.ts calls claimRewards() (line 23)
+     Severity: CRITICAL
+     → User can click "Claim Rewards" but transaction WILL revert
+     → Fix: Hide rewards UI when rewardToken == address(0), or disable button with tooltip
+
+   paused() = false
+     Semantic: CONTRACT_ACTIVE
+     → No action needed (contract is operational)
+   ```
+
+### Edge Cases
+
+- **`address(0)` may be intentional** in some contract designs (e.g., native ETH as "token address"). Note this possibility in the report but still flag for developer review.
+- **Timestamp comparison** requires reading the current block timestamp:
+  ```bash
+  cast block latest --rpc-url <rpc> --json 2>/dev/null | jq -r '.timestamp'
+  ```
+- **Multiple semantic matches** on the same contract are common (e.g., paused AND reward token = address(0)). Report each independently.
+
+### Grounding
+
+This phase was added because the MCV vault audit found `rewardToken()` returning `address(0)` (rewards never initialized) while the frontend had a fully interactive rewards UI with a "Claim Rewards" button — any click would guarantee a revert. v1.0's Phase 3 reported the raw `address(0)` value but didn't interpret its meaning or check the frontend for related interactive elements.
+
 ## Phase 4: Scan Frontend for Hardcoded Values
 
 Now search the frontend codebase for values that SHOULD match what you read on-chain. This is where mismatches hide.

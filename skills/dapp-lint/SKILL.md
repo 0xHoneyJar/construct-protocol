@@ -188,6 +188,213 @@ Then verify that code using `address` has guard clauses like `if (!address)` or 
 **Severity**: MEDIUM — Causes runtime crashes
 **Fix suggestion**: Always check `isConnected` before accessing wallet state. Use optional chaining on address-derived values.
 
+#### Scan 8: Unguarded Write Calls — `require-network-guard` (HIGH)
+
+Every `writeContract` / `writeContractAsync` call must be preceded by a chain verification guard in the same hook scope. Without this, users on the wrong chain will sign transactions that silently fail or execute against the wrong contract.
+
+**Patterns to search for:**
+
+Find all files containing write calls:
+```
+writeContract|writeContractAsync
+```
+
+Then for each file, check for the presence of ANY guard pattern:
+```
+ensureNetwork|chainId\s*===|switchChain|useSwitchChain|switchChainAsync
+```
+
+If a file has write calls but NO guard pattern → flag it.
+
+**Severity**: HIGH — CRITICAL if the write is in an approval or token transfer flow
+**Fix suggestion**: Add a network guard before every write call. Pattern: `if (!(await ensureNetwork())) { toast.error("Please switch to [chain name]"); return; }`
+
+**Grounding**: MCV audit found `useMoneycombBurn` and `useMoneycombRewards` had write calls with `ensureNetwork()` that returned silently on failure — the button did nothing, no toast, no feedback.
+
+#### Scan 9: Parallel Simulation — `require-simulation-dependency` (CRITICAL)
+
+When `useSimulate*` and `useWrite*` / `writeContract` co-exist in the same hook, the write MUST depend on the simulation result. If simulation fires in parallel with the write call (or the write constructs args inline instead of using `simData.request`), users sign transactions guaranteed to revert.
+
+**Detection pattern:**
+
+Step 1 — Find files with both simulation and write:
+```
+useSimulate
+```
+Cross-reference with files also containing:
+```
+writeContract|writeContractAsync|useWrite
+```
+
+Step 2 — In matching files, check if the write references the simulation result:
+```
+\.request|simData|simulat.*\.data
+```
+
+If the write constructs args inline (e.g., `writeContract({ args: [index] })` instead of `writeContract(simData.request)`), flag it.
+
+Step 3 — Check for simulation error gating:
+```
+simError|simulat.*error|simData.*error
+```
+
+If no error check exists before the write call, flag it.
+
+**Severity**: CRITICAL — User signs tx guaranteed to revert
+**Fix suggestion**: Simulation should run reactively (e.g., via a `pendingIndex` prop set when modal opens). Write call should check `simError` before executing. Ideal pattern: `if (simError) { toast.error("Transaction would revert"); return; }`
+
+**Grounding**: MCV audit found `useMoneycombClose` had `useSimulateMoneycombVaultCloseAccount` and `closeAccountWrite` firing in parallel — the simulation provided zero protection.
+
+#### Scan 10: Swallowed Errors — `require-decoded-error-handling` (MEDIUM)
+
+Catch blocks around `writeContract` / `writeContractAsync` calls must provide useful error feedback. Empty catches, console-only catches, and catches without error code discrimination all degrade UX.
+
+**Detection pattern:**
+
+Step 1 — Find catch blocks in files containing write calls:
+```
+catch\s*\{|catch\s*\(\w+\)\s*\{
+```
+
+Step 2 — Flag if catch body is empty or console-only:
+```
+catch\s*\{\s*\}
+```
+```
+catch\s*\(\w+\)\s*\{\s*console\.(error|log)
+```
+
+Step 3 — Check for error code discrimination:
+```
+4001|UserRejectedRequestError|user.*reject|rejected
+```
+
+If no check for user rejection (error code 4001) exists, flag it — user rejection is the most common wallet error and should be handled silently (no error toast), not treated as a failure.
+
+Step 4 — Check for error decoding:
+```
+decodeErrorResult|parseViemError|ContractFunctionRevertedError|BaseError
+```
+
+**Severity**: MEDIUM — HIGH if in a financial flow (approval, transfer, deposit)
+**Fix suggestion**: At minimum, discriminate user rejection (4001) from on-chain revert. Ideal: decode revert reason and show it to the user. Pattern:
+```typescript
+catch (error) {
+  if ((error as any).code === 4001) return; // User rejected — silent
+  toast.error("Transaction failed", { description: decodeError(error) });
+}
+```
+
+**Grounding**: MCV audit found `approveHc` and `approveAllHc` had catch blocks that were either empty or only logged to console — unhandled promise rejections on wallet reject.
+
+#### Scan 11: Environment Variable Alignment — `env-var-alignment` (HIGH)
+
+Cross-reference `process.env.*` references in source files against actual definitions in `.env*` files. Catches: referenced but undefined vars, secret leak risk (non-`NEXT_PUBLIC_` in client code), and naming mismatches.
+
+**Detection pattern:**
+
+Step 1 — Extract all env var references from source:
+```
+process\.env\.(\w+)
+```
+Scan in `**/*.{ts,tsx,js,jsx}` — build a list of referenced var names with file locations.
+
+Step 2 — Extract all env var definitions from `.env*` files:
+```
+^[A-Z_]+=
+```
+Scan in `.env`, `.env.local`, `.env.production`, `.env.example`, `.env.development` — build a list of defined var names.
+
+Step 3 — Cross-reference:
+- **Referenced but not defined**: Flag as HIGH — will be `undefined` at runtime
+- **Defined but not referenced**: Flag as INFO — may be dead config
+
+Step 4 — Client/server boundary check:
+For each env var referenced in a file containing `"use client"`:
+- If the var does NOT start with `NEXT_PUBLIC_`: Flag as HIGH — secret leak risk (var will be undefined in browser, but the pattern suggests the developer intended it to be available client-side)
+
+Step 5 — Naming mismatch detection:
+Look for vars that share the same suffix but differ in prefix:
+```
+ALCHEMY_API_KEY vs NEXT_PUBLIC_ALCHEMY_API_KEY
+RPC_URL vs NEXT_PUBLIC_RPC_URL
+```
+If both exist, flag as WARNING — likely one should reference the other, or the developer is confused about which is needed where.
+
+**Severity**: HIGH — server routes crash with undefined, client gets undefined silently
+**Fix suggestion**: Ensure every referenced env var is defined in `.env.example`. For client-side usage, always use `NEXT_PUBLIC_` prefix. For server-side env vars needed in API routes, use server-only imports.
+
+**Grounding**: MCV audit found `lib/alchemy.ts` referenced `process.env.ALCHEMY_API_KEY` (server-side) but the `.env.local` only defined `NEXT_PUBLIC_ALCHEMY_API_KEY` — the NFT API route returned 500.
+
+#### Scan 12: Unbounded Receipt Polling — `require-receipt-timeout` (MEDIUM)
+
+`useWaitForTransactionReceipt` calls without a `timeout` property cause infinite loading states on congested chains. Manual polling patterns without bounds are equally dangerous.
+
+**Detection pattern:**
+
+Step 1 — Find receipt waiting hooks:
+```
+useWaitForTransactionReceipt
+```
+
+Step 2 — In each call, check for timeout configuration:
+```
+timeout
+```
+If `useWaitForTransactionReceipt` is called without `timeout` in its config object → flag.
+
+Step 3 — Check for confirmation count (INFO severity):
+```
+confirmations
+```
+For high-value flows (deposit, transfer, swap), suggest `confirmations: 2` or higher.
+
+Step 4 — Find manual polling patterns:
+```
+setInterval|setTimeout.*receipt|setTimeout.*getTransaction
+```
+If found, check for `clearInterval`, max iteration count, or time-bound cancellation. Flag if unbounded.
+
+**Severity**: MEDIUM — Causes infinite loading spinner on congested chain
+**Fix suggestion**: Always pass `timeout` to `useWaitForTransactionReceipt`. Recommended: `timeout: 60_000` (60 seconds). For manual polling, always include a max iteration count or time-bound cancellation.
+
+**Grounding**: MCV audit found `useOnSuccess` wrapper called `useWaitForTransactionReceipt` without timeout — fixed to use `timeout: 60_000`.
+
+#### Scan 13: Dead Web3 Integrations — `dead-web3-integration` (INFO)
+
+Orphaned hooks, unused ABI exports, and unreferenced contract addresses create confusion and bloat. Web3-specific dead code is particularly dangerous because it can mislead developers into thinking features are active.
+
+**Detection pattern:**
+
+Step 1 — Find all exported custom hooks:
+```
+export\s+function\s+use\w+
+```
+Scan in `**/hooks/**/*.{ts,tsx}`. For each exported hook, check if it's imported in any component or page file:
+```
+import.*{hookName}
+```
+Flag if never imported.
+
+Step 2 — Find all exported ABI constants:
+```
+export\s+const\s+\w+Abi
+```
+For each, check if imported in any wagmi config, hook, or component file. Flag if never imported.
+
+Step 3 — Find contract address config entries:
+```
+CONTRACTS\.\w+|CONTRACT_ADDRESS|contractAddress
+```
+For each address entry, check if it's used in any hook, component, or API route. Flag if never referenced.
+
+**Exclusions**: Skip `generated.ts` / `generated/` directories — these are auto-generated and may have unused exports by design.
+
+**Severity**: INFO — MEDIUM if the dead hook wraps a write operation (misleading, potential security risk)
+**Fix suggestion**: Remove unused hooks, ABIs, and contract address entries. If intentionally kept for future use, add a comment explaining why.
+
+**Grounding**: MCV audit found `useMoneycombRewards` was never imported in any component, `Nft.ts` ABI was unused, and `getHJBurnStatuses`'s `totalBurned` was dead code.
+
 ### Phase 3: Run Oxlint (if available)
 
 If oxlint was detected in Phase 1:

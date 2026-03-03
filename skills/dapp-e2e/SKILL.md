@@ -46,7 +46,13 @@ You MUST determine what tools and environments are available before proceeding.
    - If dev server running: use `http://localhost:3000` or `:5173`
    - If not running: note that dev server must be started first
 
-7. Verify testnet/local environment:
+7. Check for agent-browser RPC interception capability:
+   - If `agent-browser` MCP is available AND supports the `route` command, set `AGENT_BROWSER_RPC=true`
+   - This enables Phase 3-AB (RPC interception) and Phase 5.5 (Wallet Edge Case Matrix)
+   - RPC interception tests the actual wallet → connector → wagmi → viem → RPC pipeline unmodified
+   - If agent-browser is available but `route` is not supported, fall back to Phase 3 Option B (direct interaction)
+
+8. Verify testnet/local environment:
    ```
    Grep: chainId|chain.*id|NEXT_PUBLIC_CHAIN in .env* files
    ```
@@ -176,6 +182,33 @@ If `agent-browser` MCP is available, you can interact with the real page:
 - Click the wallet connect button
 - If a modal appears, interact with it
 - For transaction confirmations, look for wallet popup patterns
+
+#### Option C: RPC Interception via agent-browser (Preferred when available)
+
+If `AGENT_BROWSER_RPC=true` (detected in Phase 1), use the agent-browser `route` command to intercept JSON-RPC calls at the browser network level. This is superior to mock wallet injection because it tests the actual code path unmodified.
+
+**Setup:**
+
+1. Navigate to the dApp URL with agent-browser
+2. Set up RPC route interception for the base case (happy path):
+   - `route` intercept `eth_chainId` → return the correct chain ID (e.g., `0x138D2` for Berachain 80082)
+   - `route` intercept `eth_accounts` → return test address
+   - `route` intercept `eth_requestAccounts` → return test address
+   - `route` intercept `eth_sendTransaction` → capture the calldata, return a mock tx hash
+   - `route` intercept `eth_getTransactionReceipt` → return a success receipt after brief delay
+
+3. The key advantage: wagmi's connector, viem's transport, and the app's hooks all execute their real code. No mock injection means you catch bugs in the actual integration, not just in your mock.
+
+**When to prefer Option C over Option A:**
+- Testing chain switching behavior (real `wallet_switchEthereumChain` flow)
+- Testing connector error handling (real error propagation path)
+- Testing Dynamic Labs / RainbowKit / Web3Modal integration (provider selection flow)
+- Testing hardware wallet patterns (timeout behavior, silent rejection)
+
+**When to prefer Option A (mock connector) over Option C:**
+- Testing against a real local chain (anvil) where you need actual state changes
+- Performance testing (mock is faster than RPC interception)
+- When agent-browser is not available
 
 ### Phase 4: Test Generation
 
@@ -348,6 +381,80 @@ If Playwright is NOT installed, output the generated test files and provide setu
 ```bash
 npm install -D @playwright/test
 npx playwright install chromium
+```
+
+### Phase 5.5: Wallet Edge Case Matrix (agent-browser only)
+
+**Prerequisite**: `AGENT_BROWSER_RPC=true` from Phase 1. If agent-browser is not available, skip this phase with an INFO note in the report.
+
+This phase systematically tests the wallet boundary — the browser-level layer where chain switching, transaction signing, error propagation, and receipt polling actually happen. These are the bugs that users hit but developers never see in local testing.
+
+#### Test Matrix
+
+Execute each test case by modifying the RPC interception routes set up in Phase 3 Option C:
+
+| # | Test Case | RPC Interception Setup | Expected UI Behavior | Severity if Missing |
+|---|-----------|----------------------|---------------------|-------------------|
+| 1 | **Wrong chain → write** | `eth_chainId` returns `0x1` (Ethereum mainnet) instead of correct chain | Network guard fires before write, toast shown to user, no transaction sent | CRITICAL |
+| 2 | **User rejects transaction** | `eth_sendTransaction` returns `{error: {code: 4001, message: "User rejected"}}` | UI resets to pre-submission state, no error toast (silent), retry is possible | HIGH |
+| 3 | **Receipt timeout** | `eth_getTransactionReceipt` returns `null` for all polls (never confirms) | After timeout period (e.g., 60s): timeout toast shown, block explorer link provided | HIGH |
+| 4 | **On-chain revert** | `eth_getTransactionReceipt` returns receipt with `status: "0x0"` + revert data | Decoded error message shown to user (not generic "transaction failed") | MEDIUM |
+| 5 | **Chain switch mid-batch** | Change `eth_chainId` return value between consecutive write calls | Graceful partial-success handling, remaining items flagged as unsent | MEDIUM |
+| 6 | **Disconnect mid-flow** | Remove `eth_accounts` response (return empty array `[]`) | UI returns to wallet connection state, pending transaction state cleaned up | HIGH |
+| 7 | **Hardware wallet hang** | `wallet_switchEthereumChain` never responds (simulate infinite pending) | Post-switch verification catches it, timeout after reasonable period (e.g., 30s), user informed | MEDIUM |
+
+#### Execution Protocol
+
+For each test case:
+
+1. **Setup**: Navigate to the dApp, establish baseline RPC interception (happy path)
+2. **Screenshot**: Take annotated screenshot of initial state (`agent-browser screenshot --annotate`)
+3. **Modify**: Alter the specific RPC route for the edge case being tested
+4. **Trigger**: Navigate to a write flow and trigger the transaction
+5. **Screenshot**: Take annotated screenshot of the resulting UI state
+6. **Verify**: Check if the expected UI behavior occurred
+7. **Record**: Log the result with severity
+
+#### Report Format
+
+For each test case, produce a structured finding:
+
+```markdown
+### Edge Case #2: User Rejects Transaction
+
+**RPC Setup**: eth_sendTransaction → error code 4001
+**Flow Tested**: Approve HC → Deposit
+**Expected**: UI resets, no error toast, retry possible
+**Actual**: [what actually happened]
+**Status**: PASS / FAIL
+**Severity**: HIGH (if FAIL)
+**Screenshots**: [initial_state.png, after_rejection.png]
+
+**Repro Steps**:
+1. Navigate to deposit page
+2. Click "Approve" button
+3. [Simulated] Wallet shows approval request
+4. [Simulated] User clicks "Reject"
+5. Observe: [what happened in the UI]
+```
+
+#### Dogfood Integration
+
+If the `dogfood` skill is available in the construct pack or as an MCP tool:
+
+1. Format each test result as a dogfood-compatible QA finding
+2. Include severity, repro steps, and screenshots
+3. Structure the output so it can be directly ingested by the dogfood skill for QA reporting
+4. Tag all findings with `wallet-boundary` category for filtering
+
+#### Graceful Degradation
+
+If `AGENT_BROWSER_RPC=false`:
+```
+Phase 5.5: Wallet Edge Case Matrix — SKIPPED
+Reason: agent-browser with RPC interception not available
+Recommendation: Install agent-browser MCP for comprehensive wallet boundary testing
+Alternative: Use Phase 4 error handling templates for manual Playwright-based testing
 ```
 
 ### Phase 6: Visual Verification Checklist

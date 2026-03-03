@@ -6,8 +6,8 @@ schema_version: 3
 
 name: Protocol
 slug: protocol
-version: 1.0.0
-description: "On-chain verification and QA for Web3 dApps — grounds frontend behavior in contract reality. Never trust the frontend, verify the chain."
+version: 2.0.0
+description: "On-chain verification and QA for Web3 dApps — grounds frontend behavior in contract reality from click to receipt. Verifies the wallet boundary: chain switching, error handling, simulation gating, and receipt lifecycle. Never trust the frontend, verify the chain."
 author: 0xHoneyJar
 license: MIT
 type: skill-pack
@@ -177,6 +177,11 @@ runtime_requirements:
     - name: node
       check: "node --version"
       required: true
+    - name: agent-browser
+      check: "agent-browser --version 2>/dev/null"
+      install: "See https://github.com/ArcadeAI/agent-browser"
+      required: false
+      description: "Enables RPC interception in dapp-e2e (Phase 3-AB + Phase 5.5 wallet edge case testing)"
 
 credentials:
   - name: RPC_URL

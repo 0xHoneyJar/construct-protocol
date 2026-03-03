@@ -199,12 +199,14 @@ Find all files containing write calls:
 writeContract|writeContractAsync
 ```
 
-Then for each file, check for the presence of ANY guard pattern:
+Then for each file, check for the presence of a FUNCTIONAL guard pattern. The guard must be invoked (not just imported) and must precede the write call:
 ```
-ensureNetwork|chainId\s*===|switchChain|useSwitchChain|switchChainAsync
+ensureNetwork\(|chainId\s*===|switchChainAsync\(|await\s+switchChain
 ```
 
-If a file has write calls but NO guard pattern → flag it.
+If a file has write calls but NO invoked guard pattern → flag it.
+
+**False positive reduction**: A file that merely imports `useSwitchChain` but never calls `switchChainAsync()` is NOT guarded. Check for the function CALL (with parentheses), not just the import.
 
 **Severity**: HIGH — CRITICAL if the write is in an approval or token transfer flow
 **Fix suggestion**: Add a network guard before every write call. Pattern: `if (!(await ensureNetwork())) { toast.error("Please switch to [chain name]"); return; }`
@@ -228,10 +230,12 @@ writeContract|writeContractAsync|useWrite
 
 Step 2 — In matching files, check if the write references the simulation result:
 ```
-\.request|simData|simulat.*\.data
+simData\.request|simulation\.data\.request|simulat\w+\.data\.request
 ```
 
 If the write constructs args inline (e.g., `writeContract({ args: [index] })` instead of `writeContract(simData.request)`), flag it.
+
+**Note**: The pattern `\.request` alone is too broad (matches unrelated property access like `fetch.request`). Always anchor to simulation-related variable names.
 
 Step 3 — Check for simulation error gating:
 ```
@@ -256,13 +260,20 @@ Step 1 — Find catch blocks in files containing write calls:
 catch\s*\{|catch\s*\(\w+\)\s*\{
 ```
 
-Step 2 — Flag if catch body is empty or console-only:
+Step 2 — Flag if catch body is empty (handles both `catch {}` and `catch (e) {}`):
 ```
-catch\s*\{\s*\}
+catch\s*(?:\(\w+\))?\s*\{\s*\}
 ```
-```
-catch\s*\(\w+\)\s*\{\s*console\.(error|log)
-```
+
+Step 2b — Flag console-only catches. **Note**: This pattern spans lines in real code (the `{` and `console.error` are typically on separate lines, which single-line grep cannot match). Use a two-step approach:
+
+1. Use Step 1 results to identify catch block locations (file:line)
+2. For each catch location, use the Read tool to read the next 3-5 lines after the opening `{`
+3. Classify the catch body:
+   - **Empty**: Only whitespace/closing `}` → flag
+   - **Console-only**: Only `console.log` / `console.error` / `console.warn` calls → flag
+   - **Silent return**: Only `return` / `return undefined` → flag
+   - **Has user feedback**: Contains `toast`, `throw`, `handleError`, error dispatch → pass
 
 Step 3 — Check for error code discrimination:
 ```
@@ -297,7 +308,14 @@ Step 1 — Extract all env var references from source:
 ```
 process\.env\.(\w+)
 ```
-Scan in `**/*.{ts,tsx,js,jsx}` — build a list of referenced var names with file locations.
+Also scan for Vite-style env access:
+```
+import\.meta\.env\.(\w+)
+```
+Scan in `**/*.{ts,tsx,js,jsx}` — build a list of referenced var names with file locations. Use the framework prefix to determine which pattern applies:
+- **Next.js** (`NEXT_PUBLIC_`): Uses `process.env`
+- **Vite** (`VITE_`): Uses `import.meta.env`
+- **Both may coexist** in monorepos
 
 Step 2 — Extract all env var definitions from `.env*` files:
 ```
@@ -311,7 +329,8 @@ Step 3 — Cross-reference:
 
 Step 4 — Client/server boundary check:
 For each env var referenced in a file containing `"use client"`:
-- If the var does NOT start with `NEXT_PUBLIC_`: Flag as HIGH — secret leak risk (var will be undefined in browser, but the pattern suggests the developer intended it to be available client-side)
+- **Next.js**: If the var does NOT start with `NEXT_PUBLIC_`: Flag as HIGH — secret leak risk (var will be undefined in browser, but the pattern suggests the developer intended it to be available client-side)
+- **Vite**: If the var does NOT start with `VITE_`: Flag as HIGH — same issue, different prefix convention
 
 Step 5 — Naming mismatch detection:
 Look for vars that share the same suffix but differ in prefix:
@@ -337,10 +356,10 @@ Step 1 — Find receipt waiting hooks:
 useWaitForTransactionReceipt
 ```
 
-Step 2 — In each call, check for timeout configuration:
-```
-timeout
-```
+Step 2 — For each `useWaitForTransactionReceipt` call, use the Read tool to inspect the config object passed to it. Check for a `timeout` property in the configuration.
+
+**Note**: A simple grep for `timeout` in the same file is insufficient — the file may contain `timeout` in unrelated contexts. Instead, read the 5-10 lines surrounding the `useWaitForTransactionReceipt` call and verify that `timeout` appears within the hook's config parameter object.
+
 If `useWaitForTransactionReceipt` is called without `timeout` in its config object → flag.
 
 Step 3 — Check for confirmation count (INFO severity):

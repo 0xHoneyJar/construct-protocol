@@ -94,6 +94,69 @@ Or use the `--from` flag with impersonation in `cast call` (this works because `
 cast call <contract> "function(args)" <params> --from <any-address> --rpc-url <rpc>
 ```
 
+## Phase 2.5: Frontend Simulation Verification
+
+Before running agent-side simulation (Phase 4), check whether the frontend ALREADY has client-side simulation for each write flow. This determines whether the flow is self-protecting or relies entirely on agent/manual verification.
+
+### Why This Matters
+
+Client-side simulation (via `useSimulateContract` / `useSimulate*`) can catch reverts BEFORE the user signs — the tx button stays disabled until simulation passes. Agent-side simulation (`cast call`) is a point-in-time check that may not reflect the user's actual parameters. Both are valuable; neither replaces the other.
+
+### Detection Steps
+
+For each write flow discovered in Phase 1:
+
+1. **Find the hook file** containing the `writeContract` / `useWrite*` call
+
+2. **Search for corresponding simulation hook**:
+   ```
+   Grep for "useSimulate" in the same file
+   ```
+   Also check if the simulation hook is imported from a generated file:
+   ```
+   Grep for "useSimulate.*{ContractName}" in hooks/generated* or generated/
+   ```
+
+3. **Check if simulation gates the write**:
+   - Does the write reference `simData.request` or `simulation.data.request`? → GATED
+   - Does the write construct args inline while simulation exists separately? → PARALLEL (dangerous)
+   - Does the simulation error get checked before write execution? → GATED
+   - Is the write button disabled when simulation hasn't completed? → GATED
+
+4. **Classify each flow**:
+
+| Classification | Meaning | Severity |
+|---|---|---|
+| **GATED** | Simulation exists and gates the write invocation | No action needed — flow is self-protecting |
+| **PARALLEL** | Simulation exists but doesn't gate the write | CRITICAL — simulation provides zero protection |
+| **AGENT_ONLY** | No client-side simulation exists | INFO — recommend adding `useSimulate*` for the flow |
+
+### Report Format
+
+```
+PHASE 2.5: Frontend Simulation Verification
+
+Flow: closeAccount (MoneycombVault)
+  Client simulation: useSimulateMoneycombVaultCloseAccount ✓
+  Simulation gates write: YES (pendingIndex dependency, simError check) ✓
+  Classification: GATED — self-protecting
+
+Flow: openAccount (MoneycombVault)
+  Client simulation: NONE
+  Classification: AGENT_ONLY
+  → Recommendation: Add useSimulateMoneycombVaultOpenAccount to catch reverts before signing
+  → Risk: User can trigger openAccount with invalid honeycombId — revert at wallet confirmation
+
+Flow: approve (ERC721)
+  Client simulation: NONE
+  Classification: AGENT_ONLY
+  → Note: ERC721 approve rarely reverts (owner check only). Low priority for simulation.
+```
+
+### Grounding
+
+This phase was added because the MCV audit found `useMoneycombClose` had `useSimulateMoneycombVaultCloseAccount` co-existing with `closeAccountWrite` but firing in PARALLEL — the simulation provided zero protection because the write didn't depend on the simulation result. The fix was to accept `pendingIndex` as a prop (simulation runs when modal opens) and check `simError` before executing the write. Without this phase, `simulate-flow` would run agent-side `cast call` simulation and declare the flow "passes" — missing the fact that the frontend's own simulation was broken.
+
 ## Phase 3: Pre-flight Checks
 
 Before simulating the main flow, check prerequisites that commonly cause failures:

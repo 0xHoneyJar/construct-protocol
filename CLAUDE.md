@@ -20,15 +20,15 @@ See `identity/expertise.yaml` for full domain boundaries.
 
 | Command | Description |
 |---------|-------------|
-| /contract-verify | Read deployed contract state via `cast`, compare against frontend constants |
+| /contract-verify | Read deployed contract state via `cast`, compare against frontend constants, semantic activation analysis |
 | /tx-forensics | Decode revert reasons, trace internal calls, decode Safe/multicall payloads |
 | /abi-audit | Compare frontend ABI usage against deployed contract — find stale ABIs |
 | /proxy-inspect | Read EIP-1967 slots, identify implementation, check upgrade patterns |
-| /simulate-flow | Simulate user flows via `cast call` to catch reverts before users hit them |
-| /dapp-lint | Web3-specific linting — BigInt safety, wei handling, address checksums |
+| /simulate-flow | Simulate user flows via `cast call` to catch reverts before users hit them, frontend simulation verification |
+| /dapp-lint | Web3-specific linting — BigInt safety, wei handling, address checksums, network guards, simulation gating, error handling, env alignment, receipt timeouts, dead integrations |
 | /dapp-typecheck | Verify wagmi/viem type generation matches deployed ABIs |
 | /dapp-test | Execute test suites with contract mock patterns and forked chain testing |
-| /dapp-e2e | Agent-browser QA — connect wallet, submit tx, verify state changes |
+| /dapp-e2e | Agent-browser QA — connect wallet, submit tx, verify state changes, RPC interception, wallet edge case matrix |
 | /gpt-contract-review | Cross-model review of frontend-to-contract consistency |
 
 ## Workflow
@@ -76,6 +76,7 @@ Two complementary paths that compose naturally:
 - **Required**: `RPC_URL` environment variable for chain reads
 - **Optional**: `ETHERSCAN_API_KEY` for ABI fetching
 - **Optional**: `OPENAI_API_KEY` for cross-model review
+- **Optional**: `agent-browser` MCP for wallet edge case testing (RPC interception)
 
 ## Composability
 

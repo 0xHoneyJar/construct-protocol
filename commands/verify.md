@@ -1,3 +1,26 @@
+---
+name: "verify"
+version: "1.0.0"
+description: |
+  Read deployed contract state and compare against frontend constants.
+  The core Protocol workflow. Routes to contract-verify skill.
+
+arguments:
+  - name: "address"
+    description: "Contract address to verify"
+    required: false
+  - name: "chain"
+    description: "Chain ID (e.g. 80084 for Berachain bartio)"
+    required: false
+
+agent: "contract-verify"
+agent_path: "skills/contract-verify"
+
+context_files:
+  - path: "CLAUDE.md"
+    required: true
+---
+
 # /verify — Ground Frontend in On-Chain Reality
 
 Read deployed contract state and compare against frontend constants. The core Protocol workflow.

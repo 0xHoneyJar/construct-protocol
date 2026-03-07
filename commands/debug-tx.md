@@ -1,3 +1,23 @@
+---
+name: "debug-tx"
+version: "1.0.0"
+description: |
+  Decode revert reasons, trace internal calls, and explain transaction
+  failures in plain language. Routes to tx-forensics skill.
+
+arguments:
+  - name: "tx_hash"
+    description: "Transaction hash to debug"
+    required: false
+
+agent: "tx-forensics"
+agent_path: "skills/tx-forensics"
+
+context_files:
+  - path: "CLAUDE.md"
+    required: true
+---
+
 # /debug-tx — Decode and Explain Failed Transactions
 
 Decode revert reasons, trace internal calls, and explain transaction failures in plain language.

@@ -19,6 +19,8 @@ agent_path: "skills/contract-verify"
 context_files:
   - path: "CLAUDE.md"
     required: true
+  - path: "identity/persona.yaml"
+    required: true
 ---
 
 # /verify — Ground Frontend in On-Chain Reality

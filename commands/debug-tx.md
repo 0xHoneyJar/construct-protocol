@@ -16,6 +16,8 @@ agent_path: "skills/tx-forensics"
 context_files:
   - path: "CLAUDE.md"
     required: true
+  - path: "identity/persona.yaml"
+    required: true
 ---
 
 # /debug-tx — Decode and Explain Failed Transactions

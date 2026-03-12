@@ -11,6 +11,7 @@ description: "On-chain verification and QA for Web3 dApps — grounds frontend b
 author: 0xHoneyJar
 license: MIT
 type: skill-pack
+visibility: public
 tier: L2
 
 # --- Skills ---

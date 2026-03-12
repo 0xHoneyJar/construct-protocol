@@ -8,6 +8,7 @@ name: Protocol
 slug: protocol
 version: 2.0.0
 description: "On-chain verification and QA for Web3 dApps — grounds frontend behavior in contract reality from click to receipt. Verifies the wallet boundary: chain switching, error handling, simulation gating, and receipt lifecycle. Never trust the frontend, verify the chain."
+short_description: "On-chain verification"
 author: 0xHoneyJar
 license: MIT
 type: skill-pack

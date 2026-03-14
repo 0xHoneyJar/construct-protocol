@@ -1,0 +1,22 @@
+# scripts/MANIFEST.yaml — Machine-readable tool declarations
+#
+# Lets agents discover what scripts are available, how to invoke them,
+# and what to expect back — without reading source code.
+
+scripts:
+
+  - name: detect-state
+    description: "Detect the current Protocol workflow state by reading filesystem and environment"
+    entry: detect-state.sh
+    runtime: bash
+    args: []
+    output:
+      format: text
+      fields:
+        state: "string — one of: no_config, config_present, discrepancies_found, post_fix"
+    side_effects: []
+    credentials:
+      - name: RPC_URL
+        required: false
+        hint: "RPC endpoint URL — when absent, script returns no_config"
+    danger_level: safe

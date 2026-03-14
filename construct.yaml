@@ -80,6 +80,12 @@ events:
     - event: forge.artisan.taste_inscribed
       delivery: at-least-once
 
+composition_paths:
+  writes:
+    - "grimoires/protocol/"
+compose_with:
+  - observer
+  - artisan
 pack_dependencies:
   - slug: observer
   - slug: artisan

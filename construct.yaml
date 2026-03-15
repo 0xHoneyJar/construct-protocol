@@ -7,8 +7,8 @@ schema_version: 3
 name: Protocol
 slug: protocol
 version: 2.0.0
-description: "On-chain verification and QA for Web3 dApps — grounds frontend behavior in contract reality from click to receipt. Verifies the wallet boundary: chain switching, error handling, simulation gating, and receipt lifecycle. Never trust the frontend, verify the chain."
-short_description: "On-chain verification"
+description: "Reads the chain so your users don't hit reverts. Verifies that what your frontend shows matches what the contract enforces — prices, allowances, proxy implementations, the whole wallet boundary. If cast can read it, Protocol already checked it."
+short_description: "Verify the chain, not the frontend"
 author: 0xHoneyJar
 license: MIT
 type: skill-pack

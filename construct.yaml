@@ -90,6 +90,17 @@ pack_dependencies:
   - slug: observer
   - slug: artisan
 
+capabilities:
+  model_tier: opus
+  danger_level: critical
+  effort_hint: large
+  downgrade_allowed: false
+  execution_hint: sequential
+  requires:
+    tool_calling: true
+    thinking_traces: true
+    vision: false
+
 identity:
   persona: identity/persona.yaml
   expertise: identity/expertise.yaml

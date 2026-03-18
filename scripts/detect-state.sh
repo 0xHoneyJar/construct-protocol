@@ -4,7 +4,9 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="${SCRIPT_DIR}/../../../.."
+# Find project root from cwd (handles global store symlinks where SCRIPT_DIR
+# resolves to ~/.loa/ instead of the project directory)
+PROJECT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 PROTOCOL_DIR="${PROJECT_ROOT}/grimoires/protocol"
 
 # Check if Protocol grimoire directory exists

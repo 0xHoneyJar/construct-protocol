@@ -1,3 +1,10 @@
+---
+name: gpt-contract-review
+description: Adversarial cross-model review of frontend-contract interaction code
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # gpt-contract-review — Cross-Model Adversarial Contract Review
 
 ## Purpose

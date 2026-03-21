@@ -1,3 +1,10 @@
+---
+name: dapp-lint
+description: Lint Web3 dApp frontend for common anti-patterns and BigInt safety issues
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # dapp-lint — Web3 Frontend Linter
 
 ## Purpose

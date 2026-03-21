@@ -1,3 +1,10 @@
+---
+name: proxy-inspect
+description: Identify proxy architecture, implementation, and upgrade authority
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # proxy-inspect
 
 > Identify proxy architecture, implementation, and upgrade authority.

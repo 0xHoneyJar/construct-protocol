@@ -1,3 +1,10 @@
+---
+name: contract-verify
+description: Ground dApp frontend assumptions in on-chain reality
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep, Edit]
+---
+
 # contract-verify
 
 > Ground dApp frontend assumptions in on-chain reality.

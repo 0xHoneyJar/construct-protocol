@@ -1,3 +1,10 @@
+---
+name: dapp-test
+description: Run dApp test suite and check coverage for contract interaction code
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # dapp-test — Web3 Test Suite Runner
 
 ## Purpose

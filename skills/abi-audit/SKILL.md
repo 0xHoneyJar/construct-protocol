@@ -1,3 +1,10 @@
+---
+name: abi-audit
+description: Compare frontend ABI definitions against deployed contract reality
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # abi-audit
 
 > Compare frontend ABI definitions against deployed contract reality.

@@ -1,3 +1,10 @@
+---
+name: tx-forensics
+description: Decode, trace, and explain failed or complex transactions
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # tx-forensics
 
 > Decode, trace, and explain failed or complex transactions.

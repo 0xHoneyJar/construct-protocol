@@ -1,3 +1,10 @@
+---
+name: dapp-typecheck
+description: Verify wagmi/viem type generation matches deployed ABIs
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # dapp-typecheck — Contract Type Verification
 
 ## Purpose

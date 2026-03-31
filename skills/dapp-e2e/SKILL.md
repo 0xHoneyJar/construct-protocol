@@ -1,3 +1,10 @@
+---
+name: dapp-e2e
+description: Run end-to-end browser tests for Web3 dApp wallet and transaction flows
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # dapp-e2e — Agent-Browser Web3 E2E Testing
 
 ## Purpose

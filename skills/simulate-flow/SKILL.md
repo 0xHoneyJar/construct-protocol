@@ -1,3 +1,10 @@
+---
+name: simulate-flow
+description: Dry-run user flows to catch reverts before users hit them
+user-invocable: true
+allowed-tools: [Read, Write, Bash, Glob, Grep]
+---
+
 # simulate-flow
 
 > Dry-run user flows to catch reverts before users hit them.

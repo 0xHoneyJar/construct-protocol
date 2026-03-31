@@ -7,8 +7,8 @@ schema_version: 3
 name: Protocol
 slug: protocol
 version: 2.0.0
-description: "Verify that what your frontend shows matches what the smart contract enforces — prices, allowances, proxy implementations, wallet boundaries. Catch ABI drift, decode failed transactions, and run dApp QA (linting, type-checking, e2e wallet testing) via Foundry, wagmi, and viem."
-short_description: "Frontend + smart contract verification"
+description: "Verify that what your UI shows matches what your smart contract enforces — token prices, approval amounts, proxy upgrades, wallet permissions. Catch mismatches between your frontend and deployed contracts, decode failed transactions, and run automated dApp testing (linting, type-checks, end-to-end wallet flows)."
+short_description: "Smart contract + frontend verification"
 author: 0xHoneyJar
 license: MIT
 type: skill-pack

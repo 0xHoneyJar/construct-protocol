@@ -7,8 +7,8 @@ schema_version: 3
 name: Protocol
 slug: protocol
 version: 2.0.0
-description: "Reads the chain so your users don't hit reverts. Verifies that what your frontend shows matches what the contract enforces — prices, allowances, proxy implementations, the whole wallet boundary. If cast can read it, Protocol already checked it."
-short_description: "Verify the chain, not the frontend"
+description: "Verify that what your frontend shows matches what the smart contract enforces — prices, allowances, proxy implementations, wallet boundaries. Catch ABI drift, decode failed transactions, and run dApp QA (linting, type-checking, e2e wallet testing) via Foundry, wagmi, and viem."
+short_description: "Frontend + smart contract verification"
 author: 0xHoneyJar
 license: MIT
 type: skill-pack

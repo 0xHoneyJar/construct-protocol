@@ -1,3 +1,10 @@
+---
+name: gpt-contract-review
+description: Cross-model adversarial contract review — deep audit of every place the frontend touches contracts (parameter mismatches, error handling gaps, gas estimation, optimistic update races, BigInt safety) in Bridgebuilder format, written to grimoires/protocol/contract-review.md.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep, Write
+---
+
 # gpt-contract-review — Cross-Model Adversarial Contract Review
 
 ## Purpose

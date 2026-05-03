@@ -1,3 +1,10 @@
+---
+name: dapp-typecheck
+description: Contract type verification — ensures TypeScript types in the frontend exactly match deployed smart contract ABIs by inspecting wagmi codegen, foundry/hardhat configs, and manual ABI imports.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # dapp-typecheck — Contract Type Verification
 
 ## Purpose

@@ -1,3 +1,10 @@
+---
+name: simulate-flow
+description: Dry-run user flows to catch reverts before users hit them. Uses `cast call` and `cast estimate` to verify contract interactions will succeed, estimate gas costs, and compare simulated outcomes against frontend display.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # simulate-flow
 
 > Dry-run user flows to catch reverts before users hit them.

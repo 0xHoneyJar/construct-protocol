@@ -1,3 +1,10 @@
+---
+name: proxy-inspect
+description: Identify proxy architecture, implementation, and upgrade authority. Reads EIP-1967 storage slots via `cast`, classifies proxy type (UUPS, Transparent, Beacon), and reports who controls upgrades with security implications.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # proxy-inspect
 
 > Identify proxy architecture, implementation, and upgrade authority.

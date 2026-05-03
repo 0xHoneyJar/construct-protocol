@@ -1,3 +1,10 @@
+---
+name: tx-forensics
+description: Decode, trace, and explain failed or complex transactions. Handles reverts, custom errors, Safe multisig payloads, multicalls, and nested calldata; explains what happened in plain language.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # tx-forensics
 
 > Decode, trace, and explain failed or complex transactions.

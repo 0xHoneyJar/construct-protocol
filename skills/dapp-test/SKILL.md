@@ -1,3 +1,10 @@
+---
+name: dapp-test
+description: Web3 test suite runner — runs the project's tests, diagnoses Web3-specific failures (BigInt, gas, reverts, nonce), audits coverage of contract interactions, and generates starter test scaffolding when missing.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep, Write
+---
+
 # dapp-test — Web3 Test Suite Runner
 
 ## Purpose

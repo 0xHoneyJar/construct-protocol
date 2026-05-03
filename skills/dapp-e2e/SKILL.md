@@ -1,3 +1,10 @@
+---
+name: dapp-e2e
+description: Agent-Browser Web3 E2E testing — drives wallet flows in a real browser (or generates Playwright scripts), submits transactions against test environments only, and writes a report to grimoires/protocol/e2e-report.md.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep, Write
+---
+
 # dapp-e2e — Agent-Browser Web3 E2E Testing
 
 ## Purpose

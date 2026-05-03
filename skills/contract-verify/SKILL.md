@@ -1,3 +1,10 @@
+---
+name: contract-verify
+description: Ground dApp frontend assumptions in on-chain reality. Reads deployed smart contract state via `cast` and compares against hardcoded values in the frontend codebase to catch UI/contract drift.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # contract-verify
 
 > Ground dApp frontend assumptions in on-chain reality.

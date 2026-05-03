@@ -1,3 +1,10 @@
+---
+name: dapp-lint
+description: Web3 frontend linter — scans for BigInt safety violations, wei handling errors, address checksum failures, timestamp confusion, and unsafe number coercions in dApp frontends.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # dapp-lint — Web3 Frontend Linter
 
 ## Purpose

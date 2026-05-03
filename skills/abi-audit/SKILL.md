@@ -1,3 +1,10 @@
+---
+name: abi-audit
+description: Compare frontend ABI definitions against deployed contract reality. Finds inline ABIs, ABI files, and contract interface references; cross-checks each against on-chain state via `cast`; reports mismatches that cause silent failures or reverts.
+user-invocable: true
+allowed-tools: Bash, Read, Glob, Grep
+---
+
 # abi-audit
 
 > Compare frontend ABI definitions against deployed contract reality.

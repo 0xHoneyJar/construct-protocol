@@ -80,6 +80,13 @@ events:
     - event: forge.artisan.taste_inscribed
       delivery: at-least-once
 
+streams:
+  reads:
+    - Intent
+    - Artifact
+  writes:
+    - Verdict
+
 composition_paths:
   writes:
     - "grimoires/protocol/"

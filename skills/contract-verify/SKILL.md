@@ -411,6 +411,15 @@ If you get rate-limited, wait 2 seconds and retry once. If it fails again, infor
 ### Contract not verified on explorer
 You can still call known function signatures. You just can't enumerate all functions. Focus on what the frontend uses.
 
+### Decode a failure in 3 layers (schemas ARE ABIs)
+When a verification fails, don't surface a raw error — DECODE it the way the chain decode toolchain (Viem/Wagmi/ABIs/indexers/explorers) decodes a reverted call. The hounfour schemas ARE the ABIs: decode a payload via its schema the way Viem decodes calldata via an ABI. Render three clearly-separated layers:
+
+1. **transport / crypto** — did the envelope arrive and verify? (`VerificationFailureReason`)
+2. **schema / ABI decode** — the typed, labeled fields the schema yields
+3. **semantic** — the named constraint violation (the *why-wrong*), not just "invalid"
+
+Replay + hash-chain stepping (Tenderly-style) is a LATER phase, not v1.
+
 ## Edge Cases
 
 ### Multiple contracts

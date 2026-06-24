@@ -310,6 +310,9 @@ cast nonce <address> --rpc-url <rpc>
 ```
 Compare against the tx nonce. If the tx nonce is below the current nonce, it was already replaced.
 
+### Don't crawl events one-by-one with an LLM to enumerate — measurement wants a script
+When forensics needs to *enumerate* on-chain data — every depositor to a vault, all stakers of a validator, every holder of an LST — walking ~N events one at a time with a heavy model is the wrong tool. One real case spent ~50 minutes crawling ~800 deposit events; the honest answer was a ~20-second deterministic script (deposit contract + pubkey set → total BERA + deposit count + unique depositors, zero model tokens). This is *the Lambo to the supermarket*. Measurement is the proofs floor: a deterministic **script**, not LLM reasoning. When a correction is about the *mechanics or efficiency* of a deterministic on-chain task, the fix is a primitive you reach for (or ship), never a prose tip — so the next enumeration is one script call, not a model loop.
+
 ## Error Handling
 
 ### `cast run` fails with "missing trie node"
